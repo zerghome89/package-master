@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 게임</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars if background is larger than viewport */
+        }
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('img/backgrounds/main1.jpg'), url('img/backgrounds/main2.jpg'); /* Two images */
+            background-size: auto, auto; /* Auto size for both */
+            background-position: left bottom, right bottom; /* Positions for each */
+            background-repeat: no-repeat, no-repeat; /* No repeat for both */
+            background-color: rgb(254, 247, 233);
+            z-index: -1; /* Send to back */
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .bottom-notice {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="background-container"></div>
+    <h1>이게 다 들어간다고?</h1>
+    <p>
+        6개월 동안 학수고대한 여행이 눈 앞에 다가왔습니다.<br />
+        여행이 원활하게 진행될 수 있도록 짐을 싸보세요.
+    </p>
+    <a href="pack.html" class="btn">짐 싸기 시작</a>
+    <button id="credit-button" class="btn">크레딧</button>
+    <p class="bottom-notice">(가로 해상도 1024px 이상, 크롬 브라우저에 최적화 되어 있습니다.)</p>
+
+    <div id="credit-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <p>- 제작자 : 절실</p>
+        <p>- 불볕돼지님을 비롯한 게임취업밤 AI게임잼 주최자분들 감사합니다.</p>
+        <p>- 게임취업밤 여러분의 성공적인 취업을 응원합니다.</p>
+      </div>
+    </div>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("credit-modal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("credit-button");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close-button")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+    </script>
+</body>
+</html>

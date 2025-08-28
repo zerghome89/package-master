@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 정보</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .weather-day {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .weather-day .temp {
+            font-weight: bold;
+            color: #e64a19;
+        }
+        .weather-day .rain {
+            color: #1976d2;
+        }
+        .item-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .packed-item {
+            background-color: #d9eaff;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            text-align: center;
+        }
+        .back-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .popup-content {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .popup-content p {
+            margin: 0 0 20px;
+            font-size: 20px;
+        }
+        .popup-content button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .popup-content button:hover {
+            background-color: #0056b3;
+        }
+        .stress-text-transition {
+            transition: color 0.5s ease-in-out; /* Smooth color transition */
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="audio/click.mp3" preload="auto"></audio>
+    <audio id="ocean-waves-sound" src="audio/ocean-waves.mp3" loop></audio>
+    <audio id="gameover-sound" src="audio/gameover.mp3"></audio>
+    <audio id="success-sound" src="audio/success.mp3"></audio>
+    <audio id="fail-sound" src="audio/fail.mp3"></audio>
+
+    <div id="start-popup" class="popup-overlay">
+        <div class="popup-content">
+            <p>6개월 전부터 계획한 소중한 여행. 이제 시작합니다.</p>
+            <button id="start-button">확인</button>
+        </div>
+    </div>
+    <div class="container">
+        <h1>나의 여행 정보</h1>
+
+        <h2>여행 개요</h2>
+        <p id="travel-country"></p>
+        <p id="travel-days"></p>
+        <p id="travel-accommodation"></p>
+
+        <div id="outcome-display" style="margin-top: 20px; text-align: center;">
+            <div id="background-image" style="width: 100%; height: 300px; background-size: cover; background-position: center; position: relative;">
+                <div id="rain-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.3); background-image: url('img/rain_effect.png'); background-size: cover; display: none;"></div>
+                <div id="current-time-display" style="position: absolute; top: 10px; right: 10px; color: white; font-size: 16px; font-weight: bold; background-color: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;">
+                    <!-- Current time will be displayed here -->
+                </div>
+                <button id="speed-toggle-btn" style="position: absolute; top: 45px; right: 10px; padding: 5px 10px; border-radius: 5px; border: none; background-color: rgba(0,0,0,0.5); color: white; cursor: pointer;">2배속으로</button>
+                <div id="stress-bar-container" style="position: absolute; top: 10px; left: 10px; width: 200px; height: 20px; background-color: rgba(0,0,0,0.5); border-radius: 5px; overflow: hidden;">
+                    <div id="stress-bar" style="height: 100%; width: 100%; background-color: yellow; transition: width 2s ease-in-out;"></div>
+                    <div id="stress-text" class="stress-text-transition" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: blue; text-align: center; line-height: 20px; font-size: 14px; font-weight: bold;"></div>
+                </div>
+                <div id="stress-log-display" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 770px; max-height: 60px; overflow-y: auto; background-color: rgba(0,0,0,0.7); color: white; padding: 7px; border-radius: 5px; text-align: center; font-size: 15px;">
+                    <!-- Stress log messages will appear here -->
+                </div>
+            </div>
+            <p id="outcome-message" style="font-size: 24px; font-weight: bold; margin-top: 15px; color: #333;"></p>
+        </div>
+
+        
+
+        <h2>날씨 정보</h2>
+        <div id="weather-details"></div>
+
+        <h2>챙긴 짐 목록</h2>
+        <div id="packed-items-list" class="item-list"></div>
+
+        <button class="back-button" onclick="window.location.href='pack.html'">다시 짐싸러 가기</button>
+    </div>
+
+    <div id="score-modal" class="popup-overlay" style="display: none;">
+        <div class="popup-content" style="max-width: 500px; text-align: left;">
+            <div id="score-modal-content">
+                <!-- Score details will be injected here by JS -->
+            </div>
+            <div style="margin-top: 20px; text-align: center;">
+                <input type="text" id="player-name" placeholder="점수를 등록할 닉네임을 입력하세요" style="padding: 10px; width: 60%; border-radius: 5px; border: 1px solid #ccc;">
+                <button id="save-score-btn" class="btn" style="margin-left: 10px;">점수 등록</button>
+            </div>
+            <button id="close-score-modal-btn" class="btn" style="margin-top: 10px; background-color: #777; display: block; margin-left: auto; margin-right: auto;">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedData = localStorage.getItem('travelGameData');
+            const oceanWavesSound = document.getElementById('ocean-waves-sound');
+            const gameoverSound = document.getElementById('gameover-sound');
+            const successSound = document.getElementById('success-sound');
+            const failSound = document.getElementById('fail-sound');
+            let bonusEvents = 0;
+
+            if (savedData) {
+                const data = JSON.parse(savedData);
+
+                // Modal Elements
+                const scoreModal = document.getElementById('score-modal');
+                const scoreModalContent = document.getElementById('score-modal-content');
+                const saveScoreBtn = document.getElementById('save-score-btn');
+                const closeScoreModalBtn = document.getElementById('close-score-modal-btn');
+                const playerNameInput = document.getElementById('player-name');
+
+                // Modal Event Listeners
+                closeScoreModalBtn.addEventListener('click', () => { scoreModal.style.display = 'none'; });
+                saveScoreBtn.addEventListener('click', () => {
+                    const playerName = playerNameInput.value.trim();
+                    if (!playerName) {
+                        alert('점수를 등록할 닉네임을 입력해주세요!');
+                        return;
+                    }
+                    // 추후 서버 저장 로직 구현 위치
+                    alert(`${playerName}님의 점수가 등록되었습니다! (서버 저장 기능은 구현 예정)`);
+                    scoreModal.style.display = 'none';
+                });
+
+
+                // Display Travel Overview
+                document.getElementById('travel-country').textContent = `여행지: ${data.travelInfo.country}`;
+                document.getElementById('travel-days').textContent = `여행 기간: ${data.travelInfo.numberOfDays}일`;
+                document.getElementById('travel-accommodation').textContent = `숙박: ${data.travelInfo.accommodationType}`;
+
+                // Display Weather Details
+                const weatherDetailsEl = document.getElementById('weather-details');
+                data.travelInfo.weather.forEach(dayData => {
+                    const dayEl = document.createElement('div');
+                    dayEl.classList.add('weather-day');
+                    dayEl.innerHTML = '<p>' + dayData.day + '</p>' +
+                                      '<p class="temp">' + dayData.minTemp + '°C ~ ' + dayData.maxTemp + '°C</p>' +
+                                      '<p class="rain">강수확률: ' + dayData.rainChance + '%</p>';
+                    weatherDetailsEl.appendChild(dayEl);
+                });
+
+                // Display Packed Items
+                const packedItemsListEl = document.getElementById('packed-items-list');
+                if (data.packedItems.length > 0) {
+                    data.packedItems.forEach(item => {
+                        const itemEl = document.createElement('div');
+                        itemEl.classList.add('packed-item');
+                        itemEl.textContent = `${item.name} (${item.weight}kg)`;
+                        packedItemsListEl.appendChild(itemEl);
+                    });
+                } else {
+                    packedItemsListEl.innerHTML = '<p>챙긴 짐이 없습니다.</p>';
+                }
+
+                // Stress Mechanic
+                let currentStress = 60;
+                const stressBarEl = document.getElementById('stress-bar');
+                const stressTextEl = document.getElementById('stress-text');
+                stressBarEl.style.width = currentStress + '%'; // Set initial stress bar width
+                stressTextEl.textContent = currentStress; // Set initial stress text
+
+                const currentTimeDisplayEl = document.getElementById('current-time-display');
+				const stressLogDisplayEl = document.getElementById('stress-log-display');
+
+                const allItemsData = data.allItemsData; // Get all items data
+                const packedItemIds = new Set(data.packedItems.map(item => item.id)); // Get IDs of packed items
+
+                function countItem(itemName) {
+                    return data.packedItems.filter(item => item.name === itemName).length;
+                }
+
+                // Identify essential items that were NOT packed
+                const missingEssentialItems = allItemsData.filter(item => item.isEssential && !packedItemIds.has(item.id));
+                const hasMissingEssentials = missingEssentialItems.length > 0;
+
+                let currentDay = 1;
+                let currentTimeIndex = 0;
+                let intervalDuration = 5000; // 5 seconds, changed to let
+
+                const timeSlots = {
+                    firstDay: ['공항', '마트', '오후 관광', '저녁'],
+                    intermediateDay: ['새벽', '아침', '오전 관광', '점심', '오후 관광', '저녁'],
+                    lastDay: ['새벽', '아침', '오전 관광']
+                };
+
+                // Speed Toggle Logic
+                const speedToggleBtn = document.getElementById('speed-toggle-btn');
+                let isFastMode = false;
+                speedToggleBtn.addEventListener('click', () => {
+                    isFastMode = !isFastMode;
+                    if (isFastMode) {
+                        intervalDuration = 2500; // 2x speed
+                        speedToggleBtn.textContent = '1배속으로';
+                    } else {
+                        intervalDuration = 5000; // 1x speed
+                        speedToggleBtn.textContent = '2배속으로';
+                    }
+                });
+
+				const hasItem = (name) => data.packedItems.some(item => item.name === name);
+
+				let hasPadding = hasItem('패딩');
+				let hasCoat = hasItem('코트');
+				let hasLongSleeve = hasItem('긴팔긴바지');
+				let hasCardigan = hasItem('가디건');
+				let hasUmbrella = hasItem('우산');
+                let hasSunscreen = hasItem('썬크림');
+				let hasSelfiestick = hasItem('셀카봉');
+                let hasCamera = hasItem('카메라');
+                
+                let hasSkin = hasItem('스킨');
+                let hasLotion = hasItem('로션');
+                let hasToothbrush = hasItem('양치셋');
+                let hasPajamas = hasItem('잠옷');
+                let hasDryer = hasItem('드라이어');
+                let hasCharger = hasItem('충전기');
+                let hasAdapter = hasItem('어댑터');
+                let hasSouvenir = hasItem('기념품');
+                
+                let hasSwimsuit = hasItem('수영복');
+                let hasBeachtowel = hasItem('비치타월');
+                
+                let hasBook = hasItem('책');
+                let hasSunglasses = hasItem('썬글라스');
+                
+                let hasContractedCold = false; // New variable to track if cold has been contracted
+                let souvenirExchangeEvent = false;
+
+                function animateStress(element, startValue, endValue, duration, isIncrease) {
+                    const startTime = performance.now();
+                    const originalColor = element.style.color; // Store original color
+
+                    if (isIncrease) {
+                        element.style.color = 'red';
+                    } else if (endValue < startValue) {
+                        element.style.color = 'green';
+                    }
+
+                    function updateStress(currentTime) {
+                        const elapsedTime = currentTime - startTime;
+                        const progress = Math.min(elapsedTime / duration, 1);
+
+                        const animatedValue = Math.floor(startValue + (endValue - startValue) * progress);
+                        element.textContent = animatedValue;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(updateStress);
+                        } else {
+                            // Animation complete, reset color after a short delay or immediately
+                            element.style.color = originalColor; // Reset to original color
+                        }
+                    }
+                    requestAnimationFrame(updateStress);
+                }
+
+                function simulateTravelDay() {
+                    const rainOverlayEl = document.getElementById('rain-overlay'); // Get reference
+                    rainOverlayEl.style.display = 'none';
+                    
+                    document.getElementById('click-sound').play();
+                    let times = [];
+                    if (currentDay === 1) {
+                        times = timeSlots.firstDay;
+                    } else if (currentDay === data.travelInfo.numberOfDays) {
+                        times = timeSlots.lastDay;
+                    } else {
+                        times = timeSlots.intermediateDay;
+                    }
+
+                    if (currentTimeIndex < times.length) {
+                        let stressChange = 0;
+                        let message = '';
+                        const currentTimePeriod = times[currentTimeIndex];
+						
+						currentTimeDisplayEl.innerHTML = `여행 ${currentDay}일차 ${currentTimePeriod}`;
+
+                        // Change background image based on country and time
+                        const backgroundImageEl = document.getElementById('background-image');
+                        const country = data.travelInfo.country.toLowerCase().replace(/\s/g, '');
+                        const time = currentTimePeriod;
+
+						let imageUrl;
+                        if (time.includes('새벽')) {
+                            imageUrl = `img/backgrounds/dawn.jpg`;
+                        } else if (time.includes('아침')) {
+                            imageUrl = `img/backgrounds/morning.jpg`;
+                        } else if (time.includes('공항')) {
+							imageUrl = `img/backgrounds/airport.jpg`;
+						} else if (time.includes('마트')) {
+							imageUrl = `img/backgrounds/mart.jpg`;
+						} else if (time.includes('오전')) {
+                            imageUrl = `img/backgrounds/${country}-day.jpg`;
+                        } else if (time.includes('오후')) {
+                            imageUrl = `img/backgrounds/${country}-afternoon.jpg`;
+                        } else if (time.includes('저녁')) {
+                            imageUrl = `img/backgrounds/night.jpg`;
+                        } else {
+							// default
+                            imageUrl = `img/backgrounds/${country}-day.jpg`;
+                        }
+                        
+                        backgroundImageEl.style.backgroundImage = `url('${imageUrl}')`;
+						
+                        const todayWeather = data.travelInfo.weather[currentDay - 1];
+                        const maxTemp = todayWeather.maxTemp;
+                        
+                        if ((currentDay === 1 && currentTimePeriod === '공항') 
+						    || ((currentDay >= 2 && currentDay < data.travelInfo.numberOfDays && currentTimePeriod === '아침') 
+							|| (currentDay === data.travelInfo.numberOfDays && currentTimePeriod === '아침'))) {
+                            let baseMessage = '';
+                            if (maxTemp >= 0 && maxTemp <= 10) {
+                                if (maxTemp <= 5) {
+                                    if (hasPadding && hasLongSleeve) {
+                                        stressChange = 0;
+                                        baseMessage = "날씨가 추우니 패딩과 긴팔, 긴바지를 입어야겠군.";
+                                    } else if (!hasPadding && hasCoat && hasLongSleeve) {
+                                        baseMessage = "패딩은 안챙겨왔지만 코트가 있으니 이걸로 버텨보자.";
+                                    } else {
+                                        stressChange = 26;
+                                        baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
+								hasPadding = true;
+								hasLongSleeve = true;
+                                    }
+                                } else { // 5 < maxTemp <= 10
+                                    if (hasPadding && hasLongSleeve) {
+                                        stressChange = 0;
+                                        baseMessage = "날씨가 추우니 패딩과 긴팔, 긴바지를 입어야겠군.";
+                                    } else if (!hasPadding && hasCoat && hasLongSleeve) {
+                                        stressChange = 0;
+                                        baseMessage = "코트와 긴팔, 긴바지로도 이정도 날씨는 거뜬하지.";
+                                    } else if (!hasPadding && !hasCoat && hasCardigan && hasLongSleeve) {
+                                        stressChange = 2;
+                                        baseMessage = "가디건과 긴팔긴바지가 있으니 이걸로 버텨보자.";
+                                    } else {
+                                        stressChange = 26;
+                                        baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
+								hasPadding = true;
+								hasLongSleeve = true;
+                                    }
+                                }
+                                
+                                message = baseMessage;
+                                if (currentDay > 1) { // Only check for new clothes from day 2
+                                    if (countItem('긴팔긴바지') >= currentDay) {
+                                        stressChange += -2;
+                                        message += " 새 옷을 입어 산뜻하네.";
+                                    } else {
+                                        stressChange += 2;
+                                        message += " 여행 중 입은 옷을 다시 입으니 아쉽네.";
+                                    }
+                                }
+                            } else { // maxTemp > 10
+                                stressChange = 0;
+                                baseMessage = "서울 날씨와 유사하니깐 원래 입던 옷으로 충분하지.";
+                                message = baseMessage;
+                                if (currentDay > 1) { // Only check for new clothes from day 2
+                                    if (countItem('반팔반바지') >= currentDay - 1) {
+                                        stressChange += -2;
+                                        message += " 새 옷을 입어 산뜻하네.";
+                                    } else {
+                                        stressChange += 2;
+                                        message += " 여행 중 입은 옷을 다시 입으니 아쉽네.";
+                                    }
+                                }
+                            }
+                        } else if (currentTimePeriod === '오전 관광' || currentTimePeriod === '오후 관광') {
+                            const isRaining = Math.random() * 100 < todayWeather.rainChance;
+
+                            if (isRaining) {
+                                if (hasUmbrella) {
+                                    stressChange = -2;
+                                    message = "비가 오는데 우산이 있어서 그나마 괜찮은 관광을 즐겼어.";
+                                } else {
+                                    stressChange = 6;
+                                    message = "비가 오는데 우산이 없어서 관광을 망쳤군. 우산을 사야겠어.";
+								hasUmbrella = true;
+                                }
+                                
+                                rainOverlayEl.style.display = 'block';
+                            } else {
+                                if (maxTemp > 25 && Math.random() < 0.3) {
+                                    // 수영복
+                                    if (hasSwimsuit) {
+                                        stressChange = -6;
+                                        if (hasBeachtowel) {
+                                            stressChange -= 2;
+                                        }
+                                        message = "관광을 하다보니 수영이 하고 싶어졌는데, 마침 수영복을 챙겨와서 다행이야.";
+                                    } else {
+                                        stressChange = -3;
+                                        message = "관광을 하다보니 수영이 하고 싶어졌는데, 수영복이 없어서 아쉽네.";
+                                    }
+                                } else {
+                                    if (hasSunscreen) {
+                                        stressChange = -4;
+                                        message = "썬크림이 있어 자외선 걱정 없이 즐거운 관광을 할 수 있었어.";
+                                    } else {
+                                        stressChange = 5;
+                                        message = "썬크림을 챙기지 않아서 탈까봐 신경 쓰느라 제대로 관광을 못했군. 썬크림을 사야겠어.";
+                                        hasSunscreen = true;
+                                    }
+                                }
+                                
+                                if (hasSunglasses) {
+                                    stressChange += -1;
+                                } else {
+                                    stressChange += 1;
+                                }
+                                
+                                rainOverlayEl.style.display = 'none';
+                            }
+							
+							if (hasSelfiestick) {
+                                stressChange -= 1;
+							}
+                            
+                            if (hasCamera) {
+                                stressChange -= 1;
+                            }
+                        } else if (currentTimePeriod === '마트') {
+                            let missedRequiredItem = 0;
+                            message = "생각해보니 여행 필수품인"
+                            if (country !== "제주도") {
+                               if (!hasAdapter) {
+                                  missedRequiredItem++;
+                                  message += " 어댑터";
+                                  hasAdapter = true;
+                               }
+                            }
+                            
+                            if (!hasCharger) {
+                                if (missedRequiredItem > 0) {
+                                    message += ", 충전기";
+                                } else {
+                                    message += " 충전기";
+                                }
+                                missedRequiredItem++;
+                                hasCharger = true;
+                            }
+                            
+                            if (!hasToothbrush) {
+                                if (missedRequiredItem > 0) {
+                                    message += ", 양치셋트";
+                                } else {
+                                    message += " 양치셋트";
+                                }
+                                missedRequiredItem++;
+                                hasToothbrush = true;
+                            }
+                            
+                            if (missedRequiredItem === 0) {
+                                message = "생각해보니 필수 짐들은 다 챙겨서 뭔가를 사갈 필요는 없을 것 같아.";
+                            } else {
+                                message += "를 챙기지 못했군. 사야겠어."
+                                stressChange = 0;
+                                for (let i = 0; i < missedRequiredItem; i++) {
+                                    stressChange += 3;
+                                }
+                            }
+                            
+                        } else if (currentTimePeriod === '저녁') {
+                            stressChange = -4;
+                            
+                            if (hasBook) {
+                                stressChange += -1;
+                            }
+                            
+                            if (hasPajamas && hasLotion && hasSkin && hasDryer) {
+                                message = "잠옷, 로션, 스킨, 드라이어를 가져와서 다행이야. 가성비 호텔이라 비치해둔게 별로네.";
+                            } else {
+                                let missedOptionalItem = 0;
+                                message = "";
+                                if (!hasPajamas) {
+                                    message += "잠옷"
+                                    missedOptionalItem++;
+                                }
+                                
+                                if (!hasLotion) {
+                                    if (missedOptionalItem > 0) {
+                                        message += ", "
+                                    }
+                                    message += "로션"
+                                    missedOptionalItem++;
+                                }
+                                
+                                if (!hasSkin) {
+                                    if (missedOptionalItem > 0) {
+                                        message += ", "
+                                    }
+                                    message += "스킨"
+                                    missedOptionalItem++;
+                                }
+                                
+                                if (!hasDryer) {
+                                    if (missedOptionalItem > 0) {
+                                        message += ", "
+                                    }
+                                    message += "드라이어를 "
+                                    missedOptionalItem++;
+                                } else {
+                                    message += "을 "
+                                }
+                                
+                                message += "가져올 걸.. 가성비 호텔이라 비치해둔게 별로네. 그래도 쉴 수 있어.";
+                                
+                                for (let i = 0; i < missedOptionalItem; i++) {
+                                    stressChange += 1;
+                                }
+                            }
+                            
+                        } else if (currentTimePeriod === '점심') {
+                            if (!hasContractedCold && Math.random() < 0.03) { // 3% chance of getting a cold, only if not already contracted
+                                hasContractedCold = true; // Mark cold as contracted
+                                if (hasItem('상비약')) {
+                                    stressChange = 2;
+                                    message = "감기에 걸렸지만 상비약을 챙겨와서 다행이야.";
+                                } else {
+                                    stressChange = 12;
+                                    message = "감기에 걸려서 약을 사먹었지만, 나에게 맞는 약이 아니라 효과가 그렇게 좋지 않았어.";
+                                }
+                            } else if (hasSouvenir && !souvenirExchangeEvent && currentDay > 2 && Math.random() < 0.20) {
+                                // No cold, 기념품, a good lunch
+                                stressChange = -7;
+                                message = '점심 식사를 하는 중 옆에 앉은 외국인과 기념품을 교환했어. 잘 챙겨왔군.';
+                                souvenirExchangeEvent = true;
+                            } else {
+                                // No cold, No 기념품, but a good lunch
+                                stressChange = -4;
+                                message = '점심 식당을 심사숙고해서 고른 보람이 있군. 정말 맛있어.';
+                            }
+                        } else if (currentTimePeriod === '새벽') {
+                            const underwearCount = countItem('속옷');
+                            if (underwearCount < currentDay - 1) {
+                                stressChange = 2;
+                                message = "속옷 개수가 부족해서 빨아입어야겠군.";
+                            } else {
+                                stressChange = -2;
+                                message = "속옷을 충분히 챙겨서 다행이야";
+                            }
+                        } else {
+                            // Default behavior for other times
+                            if (!hasMissingEssentials) {
+                                stressChange = -3;
+                                message = `필수품을 모두 챙겨서 편안한 시간을 보내고 있습니다.`;
+                            } else {
+                                stressChange = +3;
+                                message = `필수품이 없어 불편함을 겪고 있습니다...`;
+                            }
+                        }
+
+                        const oldStress = currentStress;
+                        currentStress += stressChange;
+                        currentStress = Math.max(0, Math.min(100, currentStress));
+                        
+                        stressBarEl.style.width = currentStress + '%';
+
+                        
+                        if (currentStress >= 100) {
+                            // Ensure stress is exactly 100 for animation
+                            currentStress = 100;
+                            setTimeout(displayGameOver, 5000); // Show game over after 5 seconds
+                        } else {
+                            currentTimeIndex++;
+                            setTimeout(simulateTravelDay, intervalDuration);
+                        }
+
+                        // Animate stress text
+                        animateStress(stressTextEl, oldStress, currentStress, 2000, stressChange > 0);
+
+                        stressLogDisplayEl.innerHTML = message;
+
+                        const actualStressChange = currentStress - oldStress;
+                        if (actualStressChange > 0) {
+                            stressLogDisplayEl.innerHTML += ` (스트레스 +${actualStressChange})`;
+                        } else if (actualStressChange < 0) {
+                            stressLogDisplayEl.innerHTML += ` (스트레스 ${actualStressChange})`;
+                            bonusEvents++;
+                        } else {
+                            stressLogDisplayEl.innerHTML += " (스트레스 변동 없음)";
+                        }
+                    } else {
+                        // End of current day, move to next day or finish
+                        currentDay++;
+                        currentTimeIndex = 0; // Reset time index for next day
+                        if (currentDay <= data.travelInfo.numberOfDays) {
+                            simulateTravelDay(intervalDuration); // Start next day
+                        } else {
+                            // All days complete, display final outcome
+                            displayFinalOutcome();
+                        }
+                    }
+                }
+
+                function displayFinalOutcome() {
+                    oceanWavesSound.pause();
+                    const outcomeDisplayEl = document.getElementById('outcome-display');
+                    const backgroundImageEl = document.getElementById('background-image');
+                    const stressLogDisplayEl = document.getElementById('stress-log-display');
+                    const currentTimeDisplayEl = document.getElementById('current-time-display');
+                    
+					
+					const imageUrl = `img/backgrounds/airport.jpg`;
+					backgroundImageEl.style.backgroundImage = `url('${imageUrl}')`;
+
+                    let outcomeMessageText = '';
+                    let outcomeBonus = 0;
+
+                    if (currentStress <= 15) {
+                        outcomeMessageText = '대성공! 완벽한 여행이었습니다!';
+                        outcomeBonus = 200;
+                        if(successSound) successSound.play();
+                    } else if (currentStress <= 30) {
+                        outcomeMessageText = '성공! 즐거운 여행이었습니다.';
+                        outcomeBonus = 100;
+                        if(successSound) successSound.play();
+                    } else if (currentStress <= 60) {
+                        outcomeMessageText = '실패! 목표한만큼 스트레스를 해소하지 못한 아쉬운 여행이었습니다...';
+                        outcomeBonus = -100;
+                        if(failSound) failSound.play();
+                    } else {
+                        outcomeMessageText = '대실패! 오히려 스트레스가 쌓인 불쾌한 여행이었습니다...';
+                        outcomeBonus = -200;
+                        if(failSound) failSound.play();
+                    }
+
+                    stressLogDisplayEl.innerHTML = outcomeMessageText;
+                    currentTimeDisplayEl.innerHTML = "여행 결산";
+
+                    // --- NEW SCORING LOGIC ---
+                    const suitcaseInfo = data.suitcaseInfo;
+                    const packedItems = data.packedItems;
+
+                    // 1. Stress Score (Weight: x10)
+                    const stressScore = (100 - currentStress) * 10;
+
+                    // 2. Weight Bonus
+                    const weightBonus = (suitcaseInfo.weightLimit - suitcaseInfo.currentWeight) * 10;
+
+                    // 3. Space Bonus
+                    const totalCells = suitcaseInfo.rows * suitcaseInfo.cols;
+                    const usedCells = packedItems.reduce((acc, item) => acc + (item.width * item.height), 0);
+                    const emptyCells = totalCells - usedCells;
+                    const spaceBonus = emptyCells * 5;
+
+                    // 4. Event Bonus (Weight: x5)
+                    const eventBonus = bonusEvents * 5;
+
+                    // 5. Total Score
+                    const totalScore = stressScore + weightBonus + spaceBonus + eventBonus + outcomeBonus;
+
+                    // Populate and show the score modal
+                    scoreModalContent.innerHTML = `
+                        <h2 style="text-align: center;">최종 점수: ${Math.round(totalScore)}점</h2>
+                        <p><strong>기본 점수:</strong> ${stressScore}점 ((100 - 스트레스 ${currentStress}) x 10)</p>
+                        <p><strong>무게 보너스:</strong> ${Math.round(weightBonus)}점 (${(suitcaseInfo.weightLimit - suitcaseInfo.currentWeight).toFixed(1)}kg 남음 x 10)</p>
+                        <p><strong>공간 보너스:</strong> ${spaceBonus}점 (${emptyCells}칸 남음 x 5)</p>
+                        <p><strong>이벤트 보너스:</strong> ${eventBonus}점 (긍정 이벤트 ${bonusEvents}회 x 5)</p>
+                        <p><strong>결과 보너스:</strong> ${outcomeBonus}점</p>
+                    `;
+                    scoreModal.style.display = 'flex';
+
+                    // Scroll to the top to show the outcome
+                    window.scrollTo(0, 0);
+                }
+
+                function displayGameOver() {
+                    oceanWavesSound.pause();
+                    if(gameoverSound) gameoverSound.play();
+
+                    const outcomeDisplayEl = document.getElementById('outcome-display');
+                    const backgroundImageEl = document.getElementById('background-image');
+                    const stressLogDisplayEl = document.getElementById('stress-log-display');
+                    const currentTimeDisplayEl = document.getElementById('current-time-display');
+
+                    // Clear any pending timeouts to stop the simulation
+                    // (Though 'return' in simulateTravelDay already handles this for the current call)
+
+                    const imageUrl = `img/backgrounds/airport.jpg`; // Or a specific game over image
+                    backgroundImageEl.style.backgroundImage = `url('${imageUrl}')`;
+
+                    stressLogDisplayEl.innerHTML = '스트레스가 100이 되어 여행을 포기했습니다. Game Over!';
+                    currentTimeDisplayEl.innerHTML = "게임 오버";
+
+                    // Optionally, disable further interaction or show a restart button
+                    // For now, just display the message
+
+                    window.scrollTo(0, 0);
+                }
+
+                // Start the simulation via popup
+                const startPopup = document.getElementById('start-popup');
+                const startButton = document.getElementById('start-button');
+
+                startButton.addEventListener('click', () => {
+                    startPopup.style.display = 'none';
+                    document.getElementById('click-sound').play();
+                    if (oceanWavesSound) {
+                        oceanWavesSound.volume = 0.4;
+                        oceanWavesSound.play();
+                    }
+                    simulateTravelDay();
+                });
+
+            } else {
+                document.querySelector('.container').innerHTML = '<h1>저장된 여행 정보가 없습니다.</h1><button class="back-button" onclick="window.location.href=\'pack.html\'">짐싸러 가기</button>';
+            }
+        });
+    </script>
+</body>
+</html>

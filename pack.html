@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이게 다 들어간다고? - 짐싸기</title>
+    <link rel="stylesheet" href="pack.css">
+    <link rel="stylesheet" href="common.css"> <!-- Link common.css for .btn styles -->
+    <style>
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0}
+            to {opacity: 1}
+        }
+
+        .modal-content {
+            background-color: #f4f4f9;
+            margin: 10% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            overflow: hidden; /* To keep border-radius on header */
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        
+
+        #trip-selection-details h4 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        #duration-options {
+            margin-top: 15px;
+        }
+
+        .modal-body button {
+            width: 80%;
+            margin-bottom: 10px;
+        }
+
+        .modal-body hr {
+            margin: 20px auto;
+            width: 80%;
+            border: 0;
+            border-top: 1px solid #ccc;
+        }
+
+    </style>
+</head>
+<body>
+    <audio id="place-sound" src="audio/item-sound.mp3" preload="auto"></audio>
+    <audio id="take-sound" src="audio/item-take.mp3" preload="auto"></audio>
+    <audio id="rotate-sound" src="audio/item-rotate.mp3" preload="auto"></audio>
+    <audio id="ambience-sound" src="audio/city-ambience.mp3" preload="auto" loop></audio>
+
+    <div id="game-container">
+        <header>
+            <h1>이게 다 들어간다고?</h1>
+            <div id="travel-purpose"></div>
+            <div id="weather-display">
+                <h3 id="weather-header">여행지 정보 (3일간) <button id="toggle-weather-btn">접기</button></h3>
+                <div id="weather-forecast-content">
+                    <div id="weather-forecast">
+                        <!-- Weather data will be inserted here by JavaScript -->
+                    </div>
+                    <div id="accommodation-info">
+                        <!-- Accommodation info will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div id="suitcase-container">
+                <h3>캐리어</h3>
+                <p><strong>무게 :</strong> <span id="current-weight">0</span>kg (제한 : <span id="weight-limit">10</span>kg)</p>
+                <div id="suitcase-grid"></div>
+            </div>
+            <div id="items-container">
+                <h3>아이템 목록</h3>
+                <p class="controls-info">아이템을 클릭해서 회전하고, 드래그해서 가방에 넣으세요.</p>
+                <div id="item-list-scroll-container">
+                    <div id="item-list"></div>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <button id="clear-bag-button" class="action-button">가방 비우기</button>
+            <button id="complete-button" class="action-button">짐싸기 완료!</button>
+            <p id="feedback-message"></p>
+        </footer>
+    </div>
+
+    <div id="trip-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>여행지 선택</h2>
+            </div>
+            <div class="modal-body">
+                <div id="trip-selection-details">
+                    <div>
+                        <h4>여행지</h4>
+                        <input type="radio" id="dest-jeju" name="destination" value="제주도">
+                        <label for="dest-jeju">제주도 (3박 4일)</label>
+                        <input type="radio" id="dest-aus" name="destination" value="호주">
+                        <label for="dest-aus">호주 (5박 6일)</label>
+                    </div>
+                    <button id="confirm-trip-btn" class="btn">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="pack.js"></script>
+    <div id="popup-message" class="popup-message"></div>
+    <div id="item-tooltip" class="item-tooltip"></div>
+</body>
+</html>
