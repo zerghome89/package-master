@@ -130,7 +130,6 @@
             transition: color 0.5s ease-in-out; /* Smooth color transition */
         }
     </style>
-</head>
 <body>
     <audio id="click-sound" src="audio/click.mp3" preload="auto"></audio>
     <audio id="ocean-waves-sound" src="audio/ocean-waves.mp3" loop></audio>
@@ -194,14 +193,20 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const supabaseUrl = 'https://npbesdliuxfmyuuqvach.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wYmVzZGxpdXhmbXl1dXF2YWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzNjcwOTcsImV4cCI6MjA3MTk0MzA5N30.xntp2q4J0z85JoNQ-uLqRyOz9_dkxosBaxgC5JGmqds';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
             const savedData = localStorage.getItem('travelGameData');
             const oceanWavesSound = document.getElementById('ocean-waves-sound');
             const gameoverSound = document.getElementById('gameover-sound');
             const successSound = document.getElementById('success-sound');
             const failSound = document.getElementById('fail-sound');
             let bonusEvents = 0;
+            let finalCalculatedScore = 0; // New variable to hold the final score
 
             if (savedData) {
                 const data = JSON.parse(savedData);
@@ -215,15 +220,29 @@
 
                 // Modal Event Listeners
                 closeScoreModalBtn.addEventListener('click', () => { scoreModal.style.display = 'none'; });
-                saveScoreBtn.addEventListener('click', () => {
+                saveScoreBtn.addEventListener('click', async () => { // Added async
                     const playerName = playerNameInput.value.trim();
                     if (!playerName) {
                         alert('점수를 등록할 닉네임을 입력해주세요!');
                         return;
                     }
-                    // 추후 서버 저장 로직 구현 위치
-                    alert(`${playerName}님의 점수가 등록되었습니다! (서버 저장 기능은 구현 예정)`);
-                    scoreModal.style.display = 'none';
+
+                    const countryName = data.travelInfo.country; // country is available from savedData
+
+                    const { data: insertData, error } = await supabase
+                        .from('score')
+                        .insert([
+                            { name: playerName, score: finalCalculatedScore, country: countryName } // Use finalCalculatedScore
+                        ]);
+
+                    if (error) {
+                        console.error('Error saving score:', error);
+                        alert('점수 저장에 실패했습니다: ' + error.message);
+                    } else {
+                        alert(`${playerName}님의 점수가 성공적으로 등록되었습니다!`);
+                        console.log('Score saved:', insertData);
+                        scoreModal.style.display = 'none';
+                    }
                 });
 
 
@@ -422,8 +441,8 @@
                                     } else {
                                         stressChange = 26;
                                         baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
-								hasPadding = true;
-								hasLongSleeve = true;
+							hasPadding = true;
+							hasLongSleeve = true;
                                     }
                                 } else { // 5 < maxTemp <= 10
                                     if (hasPadding && hasLongSleeve) {
@@ -438,8 +457,8 @@
                                     } else {
                                         stressChange = 26;
                                         baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
-								hasPadding = true;
-								hasLongSleeve = true;
+							hasPadding = true;
+							hasLongSleeve = true;
                                     }
                                 }
                                 
@@ -477,7 +496,7 @@
                                 } else {
                                     stressChange = 6;
                                     message = "비가 오는데 우산이 없어서 관광을 망쳤군. 우산을 사야겠어.";
-								hasUmbrella = true;
+							hasUmbrella = true;
                                 }
                                 
                                 rainOverlayEl.style.display = 'block';
@@ -751,10 +770,11 @@
 
                     // 5. Total Score
                     const totalScore = stressScore + weightBonus + spaceBonus + eventBonus + outcomeBonus;
+                    finalCalculatedScore = Math.round(totalScore); // Assign to the new variable
 
                     // Populate and show the score modal
-                    scoreModalContent.innerHTML = `
-                        <h2 style="text-align: center;">최종 점수: ${Math.round(totalScore)}점</h2>
+                    scoreModalContent.innerHTML = 
+                        `<h2 style="text-align: center;">최종 점수: ${finalCalculatedScore}점</h2>
                         <p><strong>기본 점수:</strong> ${stressScore}점 ((100 - 스트레스 ${currentStress}) x 10)</p>
                         <p><strong>무게 보너스:</strong> ${Math.round(weightBonus)}점 (${(suitcaseInfo.weightLimit - suitcaseInfo.currentWeight).toFixed(1)}kg 남음 x 10)</p>
                         <p><strong>공간 보너스:</strong> ${spaceBonus}점 (${emptyCells}칸 남음 x 5)</p>

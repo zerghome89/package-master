@@ -348,6 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const originalWidth = item.width;
         const originalHeight = item.height;
+        
+        // Try rotating
         item.width = originalHeight;
         item.height = originalWidth;
 
@@ -358,17 +360,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = Math.round(elementTop / CELL_SIZE);
             const col = Math.round(elementLeft / CELL_SIZE);
 
-            removeItemFromSuitcase(element, false); // Temporarily remove
-            if (!canPlaceItem(item, row, col)) {
+            // Temporarily remove from grid model to check for collision
+            removeItemFromSuitcase(element, false); 
+
+            if (canPlaceItem(item, row, col)) {
+                // It can be rotated, place it back in the model
+                placeItem(element, item, row, col, false, false); // No sound, no weight update
+            } else {
                 canRotate = false;
+                // It can't be rotated, put it back in the model with original dimensions
+                item.width = originalWidth;
+                item.height = originalHeight;
+                placeItem(element, item, row, col, false, false); // No sound, no weight update
             }
-            placeItem(element, item, row, col, false); // Put it back
         }
 
         if (canRotate) {
+            // Visual update
             element.style.width = `${item.width * CELL_SIZE}px`;
             element.style.height = `${item.height * CELL_SIZE}px`;
         } else {
+            // Revert dimension data if rotation failed
             item.width = originalWidth;
             item.height = originalHeight;
             showPopupMessage("회전할 공간이 부족합니다!");
@@ -463,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    function placeItem(element, item, startRow, startCol, playSound = true) {
+    function placeItem(element, item, startRow, startCol, playSound = true, updateWeight = true) {
         for (let r = 0; r < item.height; r++) {
             for (let c = 0; c < item.width; c++) {
                 suitcaseState[startRow + r][startCol + c] = item.id;
@@ -473,7 +485,9 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.top = `${startRow * CELL_SIZE}px`;
         element.style.left = `${startCol * CELL_SIZE}px`;
         suitcaseGrid.appendChild(element);
-        currentWeight += item.weight;
+        if (updateWeight) {
+            currentWeight += item.weight;
+        }
         updateWeightDisplay();
         if (playSound) {
             const sound = document.getElementById('place-sound');
