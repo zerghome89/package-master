@@ -13,22 +13,123 @@ body {
 
 .btn {
     display: inline-block;
-    padding: 10px 20px;
-    margin: 10px;
-    background-color: #007bff;
+    padding: 18px 35px; /* Increased padding for a larger button */
+    margin: 15px;
+    background: linear-gradient(145deg, #6a0dad, #8a2be2); /* Vibrant purple gradient */
     color: white;
     text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    border: none; /* for button element */
-    cursor: pointer; /* for button element */
+    border: none; /* No hard border */
+    border-radius: 12px; /* Modern rounded corners */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Clean sans-serif font */
+    font-size: 22px; /* Larger font size */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Subtle text shadow */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Soft, modern shadow */
+    transition: all 0.3s ease; /* Smooth transition */
+    cursor: pointer;
+    text-align: center;
+    line-height: 1;
+    letter-spacing: 0.5px; /* Slightly increased letter spacing */
 }
 
 .btn:hover {
-    background-color: #0056b3;
+    background: linear-gradient(145deg, #8a2be2, #6a0dad); /* Inverted gradient on hover */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Larger shadow on hover */
+    transform: translateY(-3px); /* Lift effect on hover */
+}
+
+.btn:active {
+    background: linear-gradient(145deg, #5a0da0, #7a1be0); /* Darker gradient on active */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Smaller shadow on active */
+    transform: translateY(0); /* Press effect */
 }
 
 a {
     text-decoration: none;
     color: white;
+}
+
+/* Score Modal Specific Styles */
+.modal-content h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.score-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    background-color: #f0f0f0; /* Light grey */
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+    border-radius: 8px;
+    margin: 0 5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.tab-button.active {
+    background: linear-gradient(45deg, #007bff, #00c6ff); /* Blue gradient for active */
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}
+
+.score-list {
+    display: none; /* Hidden by default */
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.score-list.active {
+    display: block; /* Show active list */
+}
+
+.score-list h3 {
+    text-align: center;
+    color: #555;
+    margin-top: 0;
+}
+
+.score-list ol {
+    list-style-type: decimal;
+    padding-left: 25px;
+    margin: 0;
+}
+
+.score-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.score-list li:last-child {
+    border-bottom: none;
+}
+
+.score-list li span:first-child {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.score-list li span:last-child {
+    color: #666;
 }
