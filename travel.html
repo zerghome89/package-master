@@ -180,7 +180,9 @@
         <h2>챙긴 짐 목록</h2>
         <div id="packed-items-list" class="item-list"></div>
 
+        <button class="back-button" onclick="window.location.href='index.html'">메인화면</button>
         <button class="back-button" onclick="window.location.href='pack.html'">다시 짐싸러 가기</button>
+        
     </div>
 
     <div id="score-modal" class="popup-overlay" style="display: none;">
@@ -208,6 +210,9 @@
             const gameoverSound = document.getElementById('gameover-sound');
             const successSound = document.getElementById('success-sound');
             const failSound = document.getElementById('fail-sound');
+            
+            var timeSlots;
+            
             let bonusEvents = 0;
             let finalCalculatedScore = 0; // New variable to hold the final score
 
@@ -346,11 +351,19 @@
                 let currentTimeIndex = 0;
                 let intervalDuration = 5000; // 5 seconds, changed to let
 
-                const timeSlots = {
-                    firstDay: ['공항', '마트', '오후 관광', '저녁'],
-                    intermediateDay: ['새벽', '아침', '오전 관광', '점심', '오후 관광', '저녁'],
-                    lastDay: ['새벽', '아침', '오전 관광']
-                };
+                if (data.travelInfo.country === '제주도') {
+                    timeSlots = {
+                        firstDay: ['김포공항', '제주공항', '마트', '오후 관광', '저녁'],
+                        intermediateDay: ['새벽', '아침', '오전 관광', '점심', '오후 관광', '저녁'],
+                        lastDay: ['새벽', '아침', '오전 관광']
+                    };
+                } else {
+                    timeSlots = {
+                        firstDay: ['인천공항', '시드니 공항', '마트', '오후 관광', '저녁'],
+                        intermediateDay: ['새벽', '아침', '오전 관광', '점심', '오후 관광', '저녁'],
+                        lastDay: ['새벽', '아침', '오전 관광']
+                    };
+                }
 
                 // Speed Toggle Logic
                 const speedToggleBtn = document.getElementById('speed-toggle-btn');
@@ -394,6 +407,7 @@
                 let hasSunglasses = hasItem('썬글라스');
                 let hasTablet = hasItem('태블릿PC');
                 let hasLabtop = hasItem('노트북');
+                let hasBattery = hasItem('보조배터리');
                 
                 let hasContractedCold = false; // New variable to track if cold has been contracted
                 let souvenirExchangeEvent = false;
@@ -457,6 +471,10 @@
                             imageUrl = `img/backgrounds/dawn.jpg`;
                         } else if (time.includes('아침')) {
                             imageUrl = `img/backgrounds/morning.jpg`;
+                        } else if (time.includes('제주공항')) {
+                            imageUrl = `img/backgrounds/jeju_airport.jpg`;
+                        } else if (time.includes('시드니 공항')) {
+                            imageUrl = `img/backgrounds/sydney_airport.jpg`;
                         } else if (time.includes('공항')) {
 							imageUrl = `img/backgrounds/airport.jpg`;
 						} else if (time.includes('마트')) {
@@ -477,7 +495,15 @@
                         const todayWeather = data.travelInfo.weather[currentDay - 1];
                         const maxTemp = todayWeather.maxTemp;
                         
-                        if ((currentDay === 1 && currentTimePeriod === '공항') 
+                        if (currentDay === 1 && (time === "김포공항" || time === "인천공항")) {
+                            if (hasBattery) {
+                                stressChange += 5;
+                                message = "캐리어에 보조배터리를 넣는 실수를 하다니... 꺼내느라 고생 좀 했군.";
+                            } else {
+                                stressChange = 0;
+                                message = "캐리어에 금지 품목을 넣지 않아서 다행이야.";
+                            }
+                        } else if ((currentDay === 1 && time.includes('공항'))
 						    || ((currentDay >= 2 && currentDay < data.travelInfo.numberOfDays && currentTimePeriod === '아침') 
 							|| (currentDay === data.travelInfo.numberOfDays && currentTimePeriod === '아침'))) {
                             let baseMessage = '';
@@ -564,7 +590,7 @@
                                 } else {
                                     stressChange = 6;
                                     message = "비가 오는데 우산이 없어서 관광을 망쳤군. 우산을 사야겠어.";
-							hasUmbrella = true;
+                                    hasUmbrella = true;
                                     influencingItems.push({ name: '우산', effect: 'negative' });
                                 }
                                 
@@ -599,7 +625,7 @@
                                 }
                                 
                                 if (hasSunglasses) {
-                                    stressChange += -1;
+                                    stressChange += -0.5;
                                     influencingItems.push({ name: '썬글라스', effect: 'positive' });
                                 } else {
                                     stressChange += 1;
@@ -610,12 +636,12 @@
                             }
 							
 							if (hasSelfiestick) {
-                                stressChange -= 1;
+                                stressChange -= 0.5;
                                 influencingItems.push({ name: '셀카봉', effect: 'positive' });
 							}
                             
                             if (hasCamera) {
-                                stressChange -= 1;
+                                stressChange -= 0.5;
                                 influencingItems.push({ name: '카메라', effect: 'positive' });
                             }
                         } else if (currentTimePeriod === '마트') {
@@ -673,7 +699,7 @@
 
                             // New logic for sleep kit
                             if (hasSleepKit) {
-                                stressChange += -2;
+                                stressChange += -1;
                                 influencingItems.push({ name: '수면세트', effect: 'positive' });
                             } else {
                                 // Small penalty for not having it in a budget hotel
@@ -745,13 +771,13 @@
                                 }
                             } else if (hasSouvenir && !souvenirExchangeEvent && currentDay > 2 && Math.random() < 0.30) {
                                 // No cold, 기념품, a good lunch
-                                stressChange = -7;
+                                stressChange = -6;
                                 message = '점심 식사를 하는 중 옆에 앉은 외국인과 기념품을 교환했어. 잘 챙겨왔군.';
                                 souvenirExchangeEvent = true;
                                 influencingItems.push({ name: '기념품', effect: 'positive' });
                             } else {
                                 // No cold, No 기념품, but a good lunch
-                                stressChange = -3;
+                                stressChange = -2;
                                 message = '점심 식당을 심사숙고해서 고른 보람이 있군. 정말 맛있어.';
                             }
                         } else if (currentTimePeriod === '새벽') {
@@ -804,7 +830,7 @@
                         }
 
                         const oldStress = currentStress;
-                        currentStress += stressChange;
+                        currentStress += Math.round(stressChange);
                         currentStress = Math.max(0, Math.min(100, currentStress));
                         
                         stressBarEl.style.width = currentStress + '%';
@@ -855,7 +881,7 @@
                     const currentTimeDisplayEl = document.getElementById('current-time-display');
                     
 					
-					const imageUrl = `img/backgrounds/airport.jpg`;
+					var imageUrl = `img/backgrounds/airport.jpg`;
 					backgroundImageEl.style.backgroundImage = `url('${imageUrl}')`;
 
                     let outcomeMessageText = '';

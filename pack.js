@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 23, name: '기념품', width: 1, height: 1, weight: 0.9, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
         { id: 24, name: '기념품', width: 1, height: 2, weight: 0.6, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
         { id: 25, name: '기념품', width: 1, height: 3, weight: 0.3, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
-        { id: 26, name: '태블릿PC', width: 2, height: 3, weight: 0.8, isEssential: false, color: '#A9A9CC', image: 'img/items/tablet.jpg', rotated: false },
+        { id: 26, name: '태블릿PC', width: 2, height: 3, weight: 0.8, isEssential: false, color: '#A9CCA9', image: 'img/items/tablet.jpg', rotated: false },
+        { id: 27, name: '보조배터리', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#BB7777', image: 'img/items/battery.jpg', rotated: false },
+        { id: 28, name: '샤워필터', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#964DFF', image: 'img/items/filter.jpg', rotated: false },
         { id: 970, name: '반팔반바지', width: 2, height: 2, weight: 0.5, isEssential: false, color: '#4D96FF', image: 'img/items/tshirt.jpg', rotated: false },
         { id: 980, name: '긴팔긴바지', width: 2, height: 3, weight: 1.1, isEssential: false, color: '#4682B4', image: 'img/items/longsleeve.jpg', rotated: false },
         { id: 990, name: '속옷', width: 1, height: 1, weight: 0.1, isEssential: false, color: '#FFC0CB', image: 'img/items/underwear.jpg', rotated: false }
