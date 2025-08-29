@@ -373,7 +373,7 @@
 				let hasLongSleeve = hasItem('긴팔긴바지');
 				let hasCardigan = hasItem('가디건');
 				let hasUmbrella = hasItem('우산');
-                let hasSunscreen = hasItem('썬크림');
+                let hasSunscreen = hasItem('선크림');
 				let hasSelfiestick = hasItem('셀카봉');
                 let hasCamera = hasItem('카메라');
                 
@@ -392,6 +392,8 @@
                 
                 let hasBook = hasItem('책');
                 let hasSunglasses = hasItem('썬글라스');
+                let hasTablet = hasItem('태블릿PC');
+                let hasLabtop = hasItem('노트북');
                 
                 let hasContractedCold = false; // New variable to track if cold has been contracted
                 let souvenirExchangeEvent = false;
@@ -493,8 +495,8 @@
                                     } else {
                                         stressChange = 26;
                                         baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
-							hasPadding = true;
-							hasLongSleeve = true;
+                                        hasPadding = true;
+                                        hasLongSleeve = true;
                                         influencingItems.push({ name: '패딩', effect: 'negative' });
                                         influencingItems.push({ name: '긴팔긴바지', effect: 'negative' });
                                     }
@@ -516,8 +518,8 @@
                                     } else {
                                         stressChange = 26;
                                         baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
-							hasPadding = true;
-							hasLongSleeve = true;
+                                        hasPadding = true;
+                                        hasLongSleeve = true;
                                         influencingItems.push({ name: '패딩', effect: 'negative' });
                                         influencingItems.push({ name: '긴팔긴바지', effect: 'negative' });
                                     }
@@ -571,7 +573,7 @@
                                 if (maxTemp > 25 && Math.random() < 0.3) {
                                     // 수영복
                                     if (hasSwimsuit) {
-                                        stressChange = -6;
+                                        stressChange = -4;
                                         message = "관광을 하다보니 수영이 하고 싶어졌는데, 마침 수영복을 챙겨와서 다행이야.";
                                         influencingItems.push({ name: '수영복', effect: 'positive' });
                                         if (hasBeachtowel) {
@@ -585,14 +587,14 @@
                                     }
                                 } else {
                                     if (hasSunscreen) {
-                                        stressChange = -4;
-                                        message = "썬크림이 있어 자외선 걱정 없이 즐거운 관광을 할 수 있었어.";
-                                        influencingItems.push({ name: '썬크림', effect: 'positive' });
+                                        stressChange = -2;
+                                        message = "선크림이 있어 자외선 걱정 없이 즐거운 관광을 할 수 있었어.";
+                                        influencingItems.push({ name: '선크림', effect: 'positive' });
                                     } else {
                                         stressChange = 5;
-                                        message = "썬크림을 챙기지 않아서 탈까봐 신경 쓰느라 제대로 관광을 못했군. 썬크림을 사야겠어.";
+                                        message = "선크림을 챙기지 않아서 탈까봐 신경 쓰느라 제대로 관광을 못했군. 사야겠어.";
                                         hasSunscreen = true;
-                                        influencingItems.push({ name: '썬크림', effect: 'negative' });
+                                        influencingItems.push({ name: '선크림', effect: 'negative' });
                                     }
                                 }
                                 
@@ -680,14 +682,14 @@
                             }
                             
                             if (hasPajamas && hasLotion && hasSkin && hasDryer) {
-                                message += "게다가 잠옷, 로션, 스킨, 드라이어를 가져와서 다행이야. 가성비 호텔이라 비치해둔게 별로네.";
+                                message += "잠옷, 로션, 스킨, 드라이어를 가져와서 다행이야. 가성비 호텔이라 비치해둔게 별로네.";
                                 influencingItems.push({ name: '잠옷', effect: 'positive' });
                                 influencingItems.push({ name: '로션', effect: 'positive' });
                                 influencingItems.push({ name: '스킨', effect: 'positive' });
                                 influencingItems.push({ name: '드라이어', effect: 'positive' });
                             } else {
                                 let missedOptionalItem = 0;
-                                let missingMessage = "게다가 ";
+                                let missingMessage = "";
                                 if (!hasPajamas) {
                                     missingMessage += "잠옷"
                                     missedOptionalItem++;
@@ -717,11 +719,11 @@
                                     missingMessage += "을 "
                                 }
                                 
-                                if(missedOptionalItem > 0) {
+                                if (missedOptionalItem > 0) {
                                     missingMessage += "가져올 걸.. 가성비 호텔이라 비치해둔게 별로네.";
                                     message += missingMessage;
                                 } else {
-                                     message += "가져온 세면도구로 편안한 저녁을 보냈다."
+                                     message += "가져온 도구들로 편안한 저녁을 보냈다."
                                 }
 
                                 for (let i = 0; i < missedOptionalItem; i++) {
@@ -730,10 +732,10 @@
                             }
                             
                         } else if (currentTimePeriod === '점심') {
-                            if (!hasContractedCold && Math.random() < 0.03) { // 3% chance of getting a cold, only if not already contracted
+                            if (!hasContractedCold && Math.random() < 0.30 && maxTemp <= 10) { // 30% chance of getting a cold, only if not already contracted
                                 hasContractedCold = true; // Mark cold as contracted
                                 if (hasItem('상비약')) {
-                                    stressChange = 2;
+                                    stressChange = -2;
                                     message = "감기에 걸렸지만 상비약을 챙겨와서 다행이야.";
                                     influencingItems.push({ name: '상비약', effect: 'positive' });
                                 } else {
@@ -741,7 +743,7 @@
                                     message = "감기에 걸려서 약을 사먹었지만, 나에게 맞는 약이 아니라 효과가 그렇게 좋지 않았어.";
                                     influencingItems.push({ name: '상비약', effect: 'negative' });
                                 }
-                            } else if (hasSouvenir && !souvenirExchangeEvent && currentDay > 2 && Math.random() < 0.20) {
+                            } else if (hasSouvenir && !souvenirExchangeEvent && currentDay > 2 && Math.random() < 0.30) {
                                 // No cold, 기념품, a good lunch
                                 stressChange = -7;
                                 message = '점심 식사를 하는 중 옆에 앉은 외국인과 기념품을 교환했어. 잘 챙겨왔군.';
@@ -749,7 +751,7 @@
                                 influencingItems.push({ name: '기념품', effect: 'positive' });
                             } else {
                                 // No cold, No 기념품, but a good lunch
-                                stressChange = -4;
+                                stressChange = -3;
                                 message = '점심 식당을 심사숙고해서 고른 보람이 있군. 정말 맛있어.';
                             }
                         } else if (currentTimePeriod === '새벽') {
@@ -759,10 +761,22 @@
                                 message = "속옷 개수가 부족해서 빨아입어야겠군.";
                                 influencingItems.push({ name: '속옷', effect: 'negative' });
                             } else {
-                                stressChange = -2;
-                                message = "속옷을 충분히 챙겨서 다행이야";
+                                stressChange = -1;
+                                message = "속옷을 충분히 챙겨서 다행이야.";
                                 influencingItems.push({ name: '속옷', effect: 'positive' });
                             }
+                            
+                            if (hasTablet || hasLabtop) {
+                                stressChange = -2;
+                                message += " 역시 큰 화면으로 유튜브로 보니까 좋은데?";
+                                
+                                if (hasTablet) {
+                                    influencingItems.push({ name: '태블릿PC', effect: 'positive' });
+                                } else if (hasLabtop) {
+                                    influencingItems.push({ name: '노트북', effect: 'positive' });
+                                }
+                            }
+                            
                         } else {
                             // Default behavior for other times
                             if (!hasMissingEssentials) {

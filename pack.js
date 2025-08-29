@@ -64,13 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 17, name: '양치셋', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#ADD8E6', image: 'img/items/toothbrush.jpg', rotated: false },
         { id: 18, name: '잠옷', width: 2, height: 2, weight: 0.6, isEssential: false, color: '#9370DB', image: 'img/items/pajamas.jpg', rotated: false },
         { id: 19, name: '패딩', width: 3, height: 4, weight: 1.5, isEssential: false, color: '#A9A9A9', image: 'img/items/padding.jpg', rotated: false },
-        { id: 20, name: '어댑터', width: 1, height: 1, weight: 0.5, isEssential: false, color: '#BB7777', image: 'img/items/adapter.jpg', rotated: false },
+        { id: 20, name: '어댑터', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#BB7777', image: 'img/items/adapter.jpg', rotated: false },
         { id: 21, name: '충전기', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#BB7777', image: 'img/items/charger.jpg', rotated: false },
-        { id: 22, name: '드라이어', width: 2, height: 3, weight: 1.2, isEssential: false, color: '#A9CCA9', image: 'img/items/dryer.jpg', rotated: false },
-        { id: 23, name: '기념품', width: 1, height: 1, weight: 1.5, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
-        { id: 24, name: '기념품', width: 1, height: 2, weight: 1.0, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
-        { id: 25, name: '기념품', width: 1, height: 3, weight: 0.5, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
-        { id: 970, name: '반팔반바지', width: 2, height: 2, weight: 0.7, isEssential: false, color: '#4D96FF', image: 'img/items/tshirt.jpg', rotated: false },
+        { id: 22, name: '드라이어', width: 2, height: 3, weight: 1.0, isEssential: false, color: '#A9CCA9', image: 'img/items/dryer.jpg', rotated: false },
+        { id: 23, name: '기념품', width: 1, height: 1, weight: 0.9, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
+        { id: 24, name: '기념품', width: 1, height: 2, weight: 0.6, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
+        { id: 25, name: '기념품', width: 1, height: 3, weight: 0.3, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
+        { id: 26, name: '태블릿PC', width: 2, height: 3, weight: 0.8, isEssential: false, color: '#A9A9CC', image: 'img/items/tablet.jpg', rotated: false },
+        { id: 970, name: '반팔반바지', width: 2, height: 2, weight: 0.5, isEssential: false, color: '#4D96FF', image: 'img/items/tshirt.jpg', rotated: false },
         { id: 980, name: '긴팔긴바지', width: 2, height: 3, weight: 1.1, isEssential: false, color: '#4682B4', image: 'img/items/longsleeve.jpg', rotated: false },
         { id: 990, name: '속옷', width: 1, height: 1, weight: 0.1, isEssential: false, color: '#FFC0CB', image: 'img/items/underwear.jpg', rotated: false }
     ];
@@ -168,18 +169,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (travelData.country) {
             case '제주도':
-                SUITCASE_ROWS = 8;
+                SUITCASE_ROWS = 9;
                 SUITCASE_COLS = 5;
-                weightLimit = 10; // Keep the weight limit for now, user didn't specify
+                weightLimit = 10;
                 break;
             case '호주':
-                SUITCASE_ROWS = 11;
+                SUITCASE_ROWS = 10;
                 SUITCASE_COLS = 7;
-                weightLimit = 15; // Keep the weight limit for now
+                weightLimit = 15;
                 break;
             default:
                 // Default to Australia size
-                SUITCASE_ROWS = 11;
+                SUITCASE_ROWS = 10;
                 SUITCASE_COLS = 7;
                 weightLimit = 15;
         }
@@ -196,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemsToDuplicate = itemsData.filter(item => item.id >= 900);
         if (itemsToDuplicate.length > 0) {
             itemsToDuplicate.forEach(baseItem => {
-                for (let i = 0; i < travelData.numberOfDays - 1; i++) { // Adjusted loop
+                for (let i = 0; i < travelData.numberOfDays + 1; i++) { // Adjusted loop
                     itemsData.push({ ...baseItem, id: baseItem.id + (i + 1) });
                 }
             });
