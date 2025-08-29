@@ -162,6 +162,9 @@
                     <div id="stress-bar" style="height: 100%; width: 100%; background-color: yellow; transition: width 2s ease-in-out;"></div>
                     <div id="stress-text" class="stress-text-transition" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: blue; text-align: center; line-height: 20px; font-size: 14px; font-weight: bold;"></div>
                 </div>
+                <div id="stress-item-display" style="position: absolute; top: 40px; left: 10px; color: white; font-size: 14px; background-color: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; text-align: left; max-height: 150px; overflow-y: auto;">
+                    <!-- Item effects will be displayed here -->
+                </div>
                 <div id="stress-log-display" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 770px; max-height: 60px; overflow-y: auto; background-color: rgba(0,0,0,0.7); color: white; padding: 7px; border-radius: 5px; text-align: center; font-size: 15px;">
                     <!-- Stress log messages will appear here -->
                 </div>
@@ -181,7 +184,7 @@
     </div>
 
     <div id="score-modal" class="popup-overlay" style="display: none;">
-        <div class="popup-content" style="max-width: 500px; text-align: left;">
+        <div class="popup-content" style="width: 600px; text-align: left;">
             <div id="score-modal-content">
                 <!-- Score details will be injected here by JS -->
             </div>
@@ -220,27 +223,70 @@
 
                 // Modal Event Listeners
                 closeScoreModalBtn.addEventListener('click', () => { scoreModal.style.display = 'none'; });
-                saveScoreBtn.addEventListener('click', async () => { // Added async
+                saveScoreBtn.addEventListener('click', async () => {
                     const playerName = playerNameInput.value.trim();
                     if (!playerName) {
                         alert('점수를 등록할 닉네임을 입력해주세요!');
                         return;
                     }
 
-                    const countryName = data.travelInfo.country; // country is available from savedData
+                    const countryName = data.travelInfo.country;
 
-                    const { data: insertData, error } = await supabase
+                    // Save the score
+                    const { data: insertResult, error: insertError } = await supabase
                         .from('score')
-                        .insert([
-                            { name: playerName, score: finalCalculatedScore, country: countryName } // Use finalCalculatedScore
-                        ]);
+                        .insert([{ name: playerName, score: finalCalculatedScore, country: countryName }])
+                        .select(); // Use .select() to get the inserted row back
 
-                    if (error) {
-                        console.error('Error saving score:', error);
-                        alert('점수 저장에 실패했습니다: ' + error.message);
+                    if (insertError) {
+                        console.error('Error saving score:', insertError);
+                        alert('점수 저장에 실패했습니다: ' + insertError.message);
+                        return;
+                    }
+
+                    alert(`${playerName}님의 점수가 성공적으로 등록되었습니다!`);
+                    const savedRecord = insertResult[0];
+
+                    // Fetch all scores for the country
+                    const { data: scores, error: fetchError } = await supabase
+                        .from('score')
+                        .select('id, name, score, created_at')
+                        .eq('country', countryName)
+                        .order('score', { ascending: false });
+
+                    if (fetchError) {
+                        console.error('Error fetching scores:', fetchError);
+                        alert('랭킹을 불러오는데 실패했습니다: ' + fetchError.message);
+                        scoreModal.style.display = 'none';
+                        return;
+                    }
+
+                    // Generate and display the ranking
+                    let rankingHtml = `<h2 style="text-align: center;">${countryName} 랭킹</h2><ul style="padding-left: 0; list-style-type: none; max-height: 300px; overflow-y: auto;">`;
+                    let userRank = -1;
+
+                    scores.forEach((score, index) => {
+                        const isCurrentUser = score.id === savedRecord.id;
+                        if (isCurrentUser) {
+                            userRank = index + 1;
+                        }
+                        rankingHtml += `<li style="padding: 5px; border-radius: 3px; ${isCurrentUser ? 'background-color: yellow;' : ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>${index + 1}위: ${score.name}</span>
+                                <span>${score.score}점</span>
+                            </div>
+                            <small style="display: block; color: #666; text-align: left;">${new Date(score.created_at).toLocaleString()}</small>
+                        </li>`;
+                    });
+                    rankingHtml += '</ul>';
+
+                    if (userRank !== -1) {
+                        scoreModalContent.innerHTML = rankingHtml;
+                        document.getElementById('player-name').style.display = 'none';
+                        saveScoreBtn.style.display = 'none';
+                        closeScoreModalBtn.textContent = '랭킹 닫기';
                     } else {
-                        alert(`${playerName}님의 점수가 성공적으로 등록되었습니다!`);
-                        console.log('Score saved:', insertData);
+                        alert('랭킹에서 현재 기록을 찾을 수 없습니다.');
                         scoreModal.style.display = 'none';
                     }
                 });
@@ -393,6 +439,7 @@
                     if (currentTimeIndex < times.length) {
                         let stressChange = 0;
                         let message = '';
+                        let influencingItems = []; // NEW: To track influencing items
                         const currentTimePeriod = times[currentTimeIndex];
 						
 						currentTimeDisplayEl.innerHTML = `여행 ${currentDay}일차 ${currentTimePeriod}`;
@@ -436,29 +483,42 @@
                                     if (hasPadding && hasLongSleeve) {
                                         stressChange = 0;
                                         baseMessage = "날씨가 추우니 패딩과 긴팔, 긴바지를 입어야겠군.";
+                                        influencingItems.push({ name: '패딩', effect: 'positive' });
+                                        influencingItems.push({ name: '긴팔긴바지', effect: 'positive' });
                                     } else if (!hasPadding && hasCoat && hasLongSleeve) {
                                         baseMessage = "패딩은 안챙겨왔지만 코트가 있으니 이걸로 버텨보자.";
+                                        influencingItems.push({ name: '패딩', effect: 'negative' });
+                                        influencingItems.push({ name: '코트', effect: 'positive' });
                                     } else {
                                         stressChange = 26;
                                         baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
 							hasPadding = true;
 							hasLongSleeve = true;
+                                        influencingItems.push({ name: '패딩', effect: 'negative' });
+                                        influencingItems.push({ name: '긴팔긴바지', effect: 'negative' });
                                     }
                                 } else { // 5 < maxTemp <= 10
                                     if (hasPadding && hasLongSleeve) {
                                         stressChange = 0;
                                         baseMessage = "날씨가 추우니 패딩과 긴팔, 긴바지를 입어야겠군.";
+                                        influencingItems.push({ name: '패딩', effect: 'positive' });
+                                        influencingItems.push({ name: '긴팔긴바지', effect: 'positive' });
                                     } else if (!hasPadding && hasCoat && hasLongSleeve) {
                                         stressChange = 0;
                                         baseMessage = "코트와 긴팔, 긴바지로도 이정도 날씨는 거뜬하지.";
+                                        influencingItems.push({ name: '코트', effect: 'positive' });
+                                        influencingItems.push({ name: '긴팔긴바지', effect: 'positive' });
                                     } else if (!hasPadding && !hasCoat && hasCardigan && hasLongSleeve) {
                                         stressChange = 2;
                                         baseMessage = "가디건과 긴팔긴바지가 있으니 이걸로 버텨보자.";
+                                        influencingItems.push({ name: '가디건', effect: 'positive' });
                                     } else {
                                         stressChange = 26;
                                         baseMessage = "이대로 있다가는 얼어 죽겠군. 얼어죽지 않으려면 패딩을 사야겠네.";
 							hasPadding = true;
 							hasLongSleeve = true;
+                                        influencingItems.push({ name: '패딩', effect: 'negative' });
+                                        influencingItems.push({ name: '긴팔긴바지', effect: 'negative' });
                                     }
                                 }
                                 
@@ -467,9 +527,11 @@
                                     if (countItem('긴팔긴바지') >= currentDay) {
                                         stressChange += -2;
                                         message += " 새 옷을 입어 산뜻하네.";
+                                        influencingItems.push({ name: '새 옷', effect: 'positive' });
                                     } else {
                                         stressChange += 2;
                                         message += " 여행 중 입은 옷을 다시 입으니 아쉽네.";
+                                        influencingItems.push({ name: '새 옷', effect: 'negative' });
                                     }
                                 }
                             } else { // maxTemp > 10
@@ -480,9 +542,11 @@
                                     if (countItem('반팔반바지') >= currentDay - 1) {
                                         stressChange += -2;
                                         message += " 새 옷을 입어 산뜻하네.";
+                                        influencingItems.push({ name: '새 옷', effect: 'positive' });
                                     } else {
                                         stressChange += 2;
                                         message += " 여행 중 입은 옷을 다시 입으니 아쉽네.";
+                                        influencingItems.push({ name: '새 옷', effect: 'negative' });
                                     }
                                 }
                             }
@@ -493,10 +557,12 @@
                                 if (hasUmbrella) {
                                     stressChange = -2;
                                     message = "비가 오는데 우산이 있어서 그나마 괜찮은 관광을 즐겼어.";
+                                    influencingItems.push({ name: '우산', effect: 'positive' });
                                 } else {
                                     stressChange = 6;
                                     message = "비가 오는데 우산이 없어서 관광을 망쳤군. 우산을 사야겠어.";
 							hasUmbrella = true;
+                                    influencingItems.push({ name: '우산', effect: 'negative' });
                                 }
                                 
                                 rainOverlayEl.style.display = 'block';
@@ -505,29 +571,36 @@
                                     // 수영복
                                     if (hasSwimsuit) {
                                         stressChange = -6;
+                                        message = "관광을 하다보니 수영이 하고 싶어졌는데, 마침 수영복을 챙겨와서 다행이야.";
+                                        influencingItems.push({ name: '수영복', effect: 'positive' });
                                         if (hasBeachtowel) {
                                             stressChange -= 2;
+                                            influencingItems.push({ name: '비치타월', effect: 'positive' });
                                         }
-                                        message = "관광을 하다보니 수영이 하고 싶어졌는데, 마침 수영복을 챙겨와서 다행이야.";
                                     } else {
                                         stressChange = -3;
                                         message = "관광을 하다보니 수영이 하고 싶어졌는데, 수영복이 없어서 아쉽네.";
+                                        influencingItems.push({ name: '수영복', effect: 'negative' });
                                     }
                                 } else {
                                     if (hasSunscreen) {
                                         stressChange = -4;
                                         message = "썬크림이 있어 자외선 걱정 없이 즐거운 관광을 할 수 있었어.";
+                                        influencingItems.push({ name: '썬크림', effect: 'positive' });
                                     } else {
                                         stressChange = 5;
                                         message = "썬크림을 챙기지 않아서 탈까봐 신경 쓰느라 제대로 관광을 못했군. 썬크림을 사야겠어.";
                                         hasSunscreen = true;
+                                        influencingItems.push({ name: '썬크림', effect: 'negative' });
                                     }
                                 }
                                 
                                 if (hasSunglasses) {
                                     stressChange += -1;
+                                    influencingItems.push({ name: '썬글라스', effect: 'positive' });
                                 } else {
                                     stressChange += 1;
+                                    influencingItems.push({ name: '썬글라스', effect: 'negative' });
                                 }
                                 
                                 rainOverlayEl.style.display = 'none';
@@ -535,10 +608,12 @@
 							
 							if (hasSelfiestick) {
                                 stressChange -= 1;
+                                influencingItems.push({ name: '셀카봉', effect: 'positive' });
 							}
                             
                             if (hasCamera) {
                                 stressChange -= 1;
+                                influencingItems.push({ name: '카메라', effect: 'positive' });
                             }
                         } else if (currentTimePeriod === '마트') {
                             let missedRequiredItem = 0;
@@ -548,6 +623,7 @@
                                   missedRequiredItem++;
                                   message += " 어댑터";
                                   hasAdapter = true;
+                                  influencingItems.push({ name: '어댑터', effect: 'negative' });
                                }
                             }
                             
@@ -559,6 +635,7 @@
                                 }
                                 missedRequiredItem++;
                                 hasCharger = true;
+                                influencingItems.push({ name: '충전기', effect: 'negative' });
                             }
                             
                             if (!hasToothbrush) {
@@ -569,6 +646,7 @@
                                 }
                                 missedRequiredItem++;
                                 hasToothbrush = true;
+                                influencingItems.push({ name: '양치셋', effect: 'negative' });
                             }
                             
                             if (missedRequiredItem === 0) {
@@ -586,16 +664,22 @@
                             
                             if (hasBook) {
                                 stressChange += -1;
+                                influencingItems.push({ name: '책', effect: 'positive' });
                             }
                             
                             if (hasPajamas && hasLotion && hasSkin && hasDryer) {
                                 message = "잠옷, 로션, 스킨, 드라이어를 가져와서 다행이야. 가성비 호텔이라 비치해둔게 별로네.";
+                                influencingItems.push({ name: '잠옷', effect: 'positive' });
+                                influencingItems.push({ name: '로션', effect: 'positive' });
+                                influencingItems.push({ name: '스킨', effect: 'positive' });
+                                influencingItems.push({ name: '드라이어', effect: 'positive' });
                             } else {
                                 let missedOptionalItem = 0;
                                 message = "";
                                 if (!hasPajamas) {
                                     message += "잠옷"
                                     missedOptionalItem++;
+                                    influencingItems.push({ name: '잠옷', effect: 'negative' });
                                 }
                                 
                                 if (!hasLotion) {
@@ -604,6 +688,7 @@
                                     }
                                     message += "로션"
                                     missedOptionalItem++;
+                                    influencingItems.push({ name: '로션', effect: 'negative' });
                                 }
                                 
                                 if (!hasSkin) {
@@ -612,6 +697,7 @@
                                     }
                                     message += "스킨"
                                     missedOptionalItem++;
+                                    influencingItems.push({ name: '스킨', effect: 'negative' });
                                 }
                                 
                                 if (!hasDryer) {
@@ -620,6 +706,7 @@
                                     }
                                     message += "드라이어를 "
                                     missedOptionalItem++;
+                                    influencingItems.push({ name: '드라이어', effect: 'negative' });
                                 } else {
                                     message += "을 "
                                 }
@@ -637,15 +724,18 @@
                                 if (hasItem('상비약')) {
                                     stressChange = 2;
                                     message = "감기에 걸렸지만 상비약을 챙겨와서 다행이야.";
+                                    influencingItems.push({ name: '상비약', effect: 'positive' });
                                 } else {
                                     stressChange = 12;
                                     message = "감기에 걸려서 약을 사먹었지만, 나에게 맞는 약이 아니라 효과가 그렇게 좋지 않았어.";
+                                    influencingItems.push({ name: '상비약', effect: 'negative' });
                                 }
                             } else if (hasSouvenir && !souvenirExchangeEvent && currentDay > 2 && Math.random() < 0.20) {
                                 // No cold, 기념품, a good lunch
                                 stressChange = -7;
                                 message = '점심 식사를 하는 중 옆에 앉은 외국인과 기념품을 교환했어. 잘 챙겨왔군.';
                                 souvenirExchangeEvent = true;
+                                influencingItems.push({ name: '기념품', effect: 'positive' });
                             } else {
                                 // No cold, No 기념품, but a good lunch
                                 stressChange = -4;
@@ -656,9 +746,11 @@
                             if (underwearCount < currentDay - 1) {
                                 stressChange = 2;
                                 message = "속옷 개수가 부족해서 빨아입어야겠군.";
+                                influencingItems.push({ name: '속옷', effect: 'negative' });
                             } else {
                                 stressChange = -2;
                                 message = "속옷을 충분히 챙겨서 다행이야";
+                                influencingItems.push({ name: '속옷', effect: 'positive' });
                             }
                         } else {
                             // Default behavior for other times
@@ -669,6 +761,21 @@
                                 stressChange = +3;
                                 message = `필수품이 없어 불편함을 겪고 있습니다...`;
                             }
+                        }
+
+                        // NEW: Display influencing items
+                        const stressItemDisplayEl = document.getElementById('stress-item-display');
+                        if (influencingItems.length > 0) {
+                            let itemsHtml = '';
+                            influencingItems.forEach(item => {
+                                const symbol = item.effect === 'positive' ? '😊' : '😥';
+                                itemsHtml += `<div>${item.name} ${symbol}</div>`;
+                            });
+                            stressItemDisplayEl.innerHTML = itemsHtml;
+                            stressItemDisplayEl.style.display = 'block';
+                        } else {
+                            stressItemDisplayEl.innerHTML = '';
+                            stressItemDisplayEl.style.display = 'none';
                         }
 
                         const oldStress = currentStress;
@@ -716,6 +823,7 @@
 
                 function displayFinalOutcome() {
                     oceanWavesSound.pause();
+                    document.getElementById('stress-item-display').style.display = 'none';
                     const outcomeDisplayEl = document.getElementById('outcome-display');
                     const backgroundImageEl = document.getElementById('background-image');
                     const stressLogDisplayEl = document.getElementById('stress-log-display');
@@ -772,16 +880,18 @@
                     const totalScore = stressScore + weightBonus + spaceBonus + eventBonus + outcomeBonus;
                     finalCalculatedScore = Math.round(totalScore); // Assign to the new variable
 
-                    // Populate and show the score modal
-                    scoreModalContent.innerHTML = 
-                        `<h2 style="text-align: center;">최종 점수: ${finalCalculatedScore}점</h2>
-                        <p><strong>기본 점수:</strong> ${stressScore}점 ((100 - 스트레스 ${currentStress}) x 10)</p>
-                        <p><strong>무게 보너스:</strong> ${Math.round(weightBonus)}점 (${(suitcaseInfo.weightLimit - suitcaseInfo.currentWeight).toFixed(1)}kg 남음 x 10)</p>
-                        <p><strong>공간 보너스:</strong> ${spaceBonus}점 (${emptyCells}칸 남음 x 5)</p>
-                        <p><strong>이벤트 보너스:</strong> ${eventBonus}점 (긍정 이벤트 ${bonusEvents}회 x 5)</p>
-                        <p><strong>결과 보너스:</strong> ${outcomeBonus}점</p>
-                    `;
-                    scoreModal.style.display = 'flex';
+                    setTimeout(() => {
+                        // Populate and show the score modal
+                        scoreModalContent.innerHTML = 
+                            `<h2 style="text-align: center;">최종 점수: ${finalCalculatedScore}점</h2>
+                            <p><strong>기본 점수:</strong> ${stressScore}점 ((100 - 스트레스 ${currentStress}) x 10)</p>
+                            <p><strong>무게 보너스:</strong> ${Math.round(weightBonus)}점 (${(suitcaseInfo.weightLimit - suitcaseInfo.currentWeight).toFixed(1)}kg 남음 x 10)</p>
+                            <p><strong>공간 보너스:</strong> ${spaceBonus}점 (${emptyCells}칸 남음 x 5)</p>
+                            <p><strong>이벤트 보너스:</strong> ${eventBonus}점 (긍정 이벤트 ${bonusEvents}회 x 5)</p>
+                            <p><strong>결과 보너스:</strong> ${outcomeBonus}점</p>
+                        `;
+                        scoreModal.style.display = 'flex';
+                    }, 2500);
 
                     // Scroll to the top to show the outcome
                     window.scrollTo(0, 0);
