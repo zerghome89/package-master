@@ -45,32 +45,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Data Store ---
     const initialItemsData = [
-        { id: 1, name: '수영복', width: 2, height: 2, weight: 0.5, isEssential: false, color: '#FF6B6B', image: 'img/items/swimsuit.jpg' },
-        { id: 2, name: '선크림', width: 1, height: 2, weight: 0.2, isEssential: false, color: '#FFD93D', image: 'img/items/sunscreen.jpg' },
-        { id: 3, name: '비치타월', width: 2, height: 3, weight: 1.0, isEssential: false, color: '#6BCB77', image: 'img/items/beachtowel.jpg' },
-        { id: 4, name: '내복', width: 2, height: 2, weight: 0.5, isEssential: false, color: '#D3D3D3', image: 'img/items/longjohns.jpg' },
-        { id: 6, name: '책', width: 2, height: 3, weight: 0.8, isEssential: false, color: '#F7A072', image: 'img/items/book.jpg' },
-        { id: 7, name: '카메라', width: 2, height: 2, weight: 1.2, isEssential: false, color: '#8A2BE2', image: 'img/items/camera.jpg' },
-        { id: 8, name: '노트북', width: 4, height: 3, weight: 1.8, isEssential: false, color: '#A5A5A5', image: 'img/items/laptop.jpg' },
-        { id: 9, name: '가디건', width: 2, height: 2, weight: 0.8, isEssential: false, color: '#A9A9A9', image: 'img/items/cardigan.jpg' },
-        { id: 10, name: '코트', width: 2, height: 3, weight: 1.5, isEssential: false, color: '#A9A9A9', image: 'img/items/coat.jpg' },
-        { id: 11, name: '우산', width: 1, height: 3, weight: 0.5, isEssential: false, color: '#7777CB', image: 'img/items/umbrella.jpg' },
-        { id: 12, name: '셀카봉', width: 1, height: 3, weight: 0.3, isEssential: false, color: '#E6E6FA', image: 'img/items/selfiestick.jpg' },
-        { id: 13, name: '상비약', width: 2, height: 2, weight: 0.4, isEssential: false, color: '#90EE90', image: 'img/items/medkit.jpg' },
-        { id: 14, name: '스킨', width: 1, height: 2, weight: 0.3, isEssential: false, color: '#ADD8E6', image: 'img/items/skin.jpg' },
-        { id: 15, name: '로션', width: 1, height: 2, weight: 0.3, isEssential: false, color: '#F0E68C', image: 'img/items/lotion.jpg' },
-        { id: 17, name: '양치셋', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#ADD8E6', image: 'img/items/toothbrush.jpg' },
-        { id: 18, name: '잠옷', width: 2, height: 2, weight: 0.6, isEssential: false, color: '#9370DB', image: 'img/items/pajamas.jpg' },
-        { id: 19, name: '패딩', width: 3, height: 4, weight: 1.5, isEssential: false, color: '#A9A9A9', image: 'img/items/padding.jpg' },
-        { id: 20, name: '어댑터', width: 1, height: 1, weight: 0.5, isEssential: false, color: '#BB7777', image: 'img/items/adapter.jpg' },
-        { id: 21, name: '충전기', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#BB7777', image: 'img/items/charger.jpg' },
-        { id: 22, name: '드라이어', width: 2, height: 3, weight: 1.2, isEssential: false, color: '#A9CCA9', image: 'img/items/dryer.jpg' },
-        { id: 23, name: '기념품', width: 1, height: 1, weight: 1.5, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg' },
-        { id: 24, name: '기념품', width: 1, height: 2, weight: 1.0, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg' },
-        { id: 25, name: '기념품', width: 1, height: 3, weight: 0.5, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg' },
-        { id: 970, name: '반팔반바지', width: 2, height: 2, weight: 0.7, isEssential: false, color: '#4D96FF', image: 'img/items/tshirt.jpg' },
-        { id: 980, name: '긴팔긴바지', width: 2, height: 3, weight: 1.1, isEssential: false, color: '#4682B4', image: 'img/items/longsleeve.jpg' },
-        { id: 990, name: '속옷', width: 1, height: 1, weight: 0.1, isEssential: false, color: '#FFC0CB', image: 'img/items/underwear.jpg' }
+        { id: 1, name: '수영복', width: 2, height: 2, weight: 0.5, isEssential: false, color: '#FF6B6B', image: 'img/items/swimsuit.jpg', rotated: false },
+        { id: 2, name: '선크림', width: 1, height: 2, weight: 0.2, isEssential: false, color: '#FFD93D', image: 'img/items/sunscreen.jpg', rotated: false },
+        { id: 3, name: '비치타월', width: 2, height: 3, weight: 1.0, isEssential: false, color: '#6BCB77', image: 'img/items/beachtowel.jpg', rotated: false },
+        { id: 4, name: '내복', width: 2, height: 2, weight: 0.5, isEssential: false, color: '#D3D3D3', image: 'img/items/longjohns.jpg', rotated: false },
+        { id: 5, name: '썬글라스', width: 2, height: 1, weight: 0.3, isEssential: false, color: '#B3D3B3', image: 'img/items/sunglasses.jpg', rotated: false },
+        { id: 6, name: '책', width: 2, height: 3, weight: 0.8, isEssential: false, color: '#F7A072', image: 'img/items/book.jpg', rotated: false },
+        { id: 7, name: '카메라', width: 2, height: 2, weight: 1.2, isEssential: false, color: '#8A2BE2', image: 'img/items/camera.jpg', rotated: false },
+        { id: 8, name: '노트북', width: 4, height: 3, weight: 1.8, isEssential: false, color: '#A5A5A5', image: 'img/items/laptop.jpg', rotated: false },
+        { id: 9, name: '가디건', width: 2, height: 2, weight: 0.8, isEssential: false, color: '#A9A9A9', image: 'img/items/cardigan.jpg', rotated: false },
+        { id: 10, name: '코트', width: 2, height: 3, weight: 1.5, isEssential: false, color: '#A9A9A9', image: 'img/items/coat.jpg', rotated: false },
+        { id: 11, name: '우산', width: 1, height: 3, weight: 0.5, isEssential: false, color: '#7777CB', image: 'img/items/umbrella.jpg', rotated: false },
+        { id: 12, name: '셀카봉', width: 1, height: 3, weight: 0.3, isEssential: false, color: '#E6E6FA', image: 'img/items/selfiestick.jpg', rotated: false },
+        { id: 13, name: '상비약', width: 2, height: 2, weight: 0.4, isEssential: false, color: '#90EE90', image: 'img/items/medkit.jpg', rotated: false },
+        { id: 14, name: '스킨', width: 1, height: 2, weight: 0.3, isEssential: false, color: '#ADD8E6', image: 'img/items/skin.jpg', rotated: false },
+        { id: 15, name: '로션', width: 1, height: 2, weight: 0.3, isEssential: false, color: '#F0E68C', image: 'img/items/lotion.jpg', rotated: false },
+        { id: 16, name: '수면세트', width: 2, height: 1, weight: 0.1, isEssential: false, color: '#E6E6FA', image: 'img/items/sleepkit.jpg', rotated: false },
+        { id: 17, name: '양치셋', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#ADD8E6', image: 'img/items/toothbrush.jpg', rotated: false },
+        { id: 18, name: '잠옷', width: 2, height: 2, weight: 0.6, isEssential: false, color: '#9370DB', image: 'img/items/pajamas.jpg', rotated: false },
+        { id: 19, name: '패딩', width: 3, height: 4, weight: 1.5, isEssential: false, color: '#A9A9A9', image: 'img/items/padding.jpg', rotated: false },
+        { id: 20, name: '어댑터', width: 1, height: 1, weight: 0.5, isEssential: false, color: '#BB7777', image: 'img/items/adapter.jpg', rotated: false },
+        { id: 21, name: '충전기', width: 1, height: 1, weight: 0.2, isEssential: false, color: '#BB7777', image: 'img/items/charger.jpg', rotated: false },
+        { id: 22, name: '드라이어', width: 2, height: 3, weight: 1.2, isEssential: false, color: '#A9CCA9', image: 'img/items/dryer.jpg', rotated: false },
+        { id: 23, name: '기념품', width: 1, height: 1, weight: 1.5, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
+        { id: 24, name: '기념품', width: 1, height: 2, weight: 1.0, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
+        { id: 25, name: '기념품', width: 1, height: 3, weight: 0.5, isEssential: false, color: '#A9A9CC', image: 'img/items/souvenir.jpg', rotated: false },
+        { id: 970, name: '반팔반바지', width: 2, height: 2, weight: 0.7, isEssential: false, color: '#4D96FF', image: 'img/items/tshirt.jpg', rotated: false },
+        { id: 980, name: '긴팔긴바지', width: 2, height: 3, weight: 1.1, isEssential: false, color: '#4682B4', image: 'img/items/longsleeve.jpg', rotated: false },
+        { id: 990, name: '속옷', width: 1, height: 1, weight: 0.1, isEssential: false, color: '#FFC0CB', image: 'img/items/underwear.jpg', rotated: false }
     ];
 
     // Define weather profiles for different seasons and hemispheres
@@ -166,19 +168,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (travelData.country) {
             case '제주도':
-                SUITCASE_ROWS = 9;
-                SUITCASE_COLS = 6;
-                weightLimit = 10;
+                SUITCASE_ROWS = 8;
+                SUITCASE_COLS = 5;
+                weightLimit = 10; // Keep the weight limit for now, user didn't specify
                 break;
             case '호주':
                 SUITCASE_ROWS = 11;
-                SUITCASE_COLS = 8;
-                weightLimit = 15;
+                SUITCASE_COLS = 7;
+                weightLimit = 15; // Keep the weight limit for now
                 break;
             default:
+                // Default to Australia size
                 SUITCASE_ROWS = 11;
-                SUITCASE_COLS = 8;
-                weightLimit = 10;
+                SUITCASE_COLS = 7;
+                weightLimit = 15;
         }
 
         weightLimitEl.textContent = weightLimit;
@@ -239,21 +242,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function createItemElement(itemData) {
         const itemEl = document.createElement('div');
         itemEl.classList.add('item');
+        if (itemData.rotated) {
+            itemEl.classList.add('rotated');
+        }
         itemEl.draggable = true;
         itemEl.style.width = `${itemData.width * CELL_SIZE}px`;
         itemEl.style.height = `${itemData.height * CELL_SIZE}px`;
 
+        // Create a separate element for the image
+        const imageEl = document.createElement('div');
+        imageEl.classList.add('item-image');
+
         if (itemData.image) {
-            itemEl.style.backgroundImage = `url('${itemData.image}')`;
-            itemEl.style.backgroundSize = 'contain';
-            itemEl.style.backgroundRepeat = 'no-repeat';
-            itemEl.style.backgroundPosition = 'center';
+            imageEl.style.backgroundImage = `url('${itemData.image}')`;
+            itemEl.appendChild(imageEl);
             itemEl.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
         } else {
             itemEl.style.backgroundColor = itemData.color;
         }
 
-        itemEl.innerHTML = `<span class="item-name">${itemData.name}<br>(${itemData.weight}kg)</span>`;
+        const nameEl = document.createElement('span');
+        nameEl.classList.add('item-name');
+        nameEl.innerHTML = `${itemData.name}<br>(${itemData.weight}kg)`;
+        itemEl.appendChild(nameEl);
+
         itemEl.dataset.itemId = itemData.id;
         itemEl.dataset.itemName = itemData.name;
         itemEl.dataset.itemDescription = `무게: ${itemData.weight}kg, 크기: ${itemData.width}x${itemData.height}`;
@@ -341,13 +353,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function rotateItemOnClick(element, item) {
+        const originalWidth = item.width;
+        const originalHeight = item.height;
+
+        // Prevent rotation for square items
+        if (originalWidth === originalHeight) {
+            return; 
+        }
+
         if (rotateSound) {
             rotateSound.currentTime = 0;
             rotateSound.play().catch(error => console.error("Audio play failed:", error));
         }
-
-        const originalWidth = item.width;
-        const originalHeight = item.height;
         
         // Try rotating
         item.width = originalHeight;
@@ -379,6 +396,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Visual update
             element.style.width = `${item.width * CELL_SIZE}px`;
             element.style.height = `${item.height * CELL_SIZE}px`;
+            
+            // Toggle rotation state
+            item.rotated = !item.rotated;
+            element.classList.toggle('rotated');
+
         } else {
             // Revert dimension data if rotation failed
             item.width = originalWidth;

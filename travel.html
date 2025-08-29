@@ -385,6 +385,7 @@
                 let hasCharger = hasItem('충전기');
                 let hasAdapter = hasItem('어댑터');
                 let hasSouvenir = hasItem('기념품');
+                let hasSleepKit = hasItem('수면세트');
                 
                 let hasSwimsuit = hasItem('수영복');
                 let hasBeachtowel = hasItem('비치타월');
@@ -660,59 +661,69 @@
                             }
                             
                         } else if (currentTimePeriod === '저녁') {
-                            stressChange = -4;
-                            
+                            stressChange = -3; // Base relief
+                            message = '';
+
                             if (hasBook) {
                                 stressChange += -1;
                                 influencingItems.push({ name: '책', effect: 'positive' });
                             }
+
+                            // New logic for sleep kit
+                            if (hasSleepKit) {
+                                stressChange += -2;
+                                influencingItems.push({ name: '수면세트', effect: 'positive' });
+                            } else {
+                                // Small penalty for not having it in a budget hotel
+                                stressChange += 1;
+                                influencingItems.push({ name: '수면세트', effect: 'negative' });
+                            }
                             
                             if (hasPajamas && hasLotion && hasSkin && hasDryer) {
-                                message = "잠옷, 로션, 스킨, 드라이어를 가져와서 다행이야. 가성비 호텔이라 비치해둔게 별로네.";
+                                message += "게다가 잠옷, 로션, 스킨, 드라이어를 가져와서 다행이야. 가성비 호텔이라 비치해둔게 별로네.";
                                 influencingItems.push({ name: '잠옷', effect: 'positive' });
                                 influencingItems.push({ name: '로션', effect: 'positive' });
                                 influencingItems.push({ name: '스킨', effect: 'positive' });
                                 influencingItems.push({ name: '드라이어', effect: 'positive' });
                             } else {
                                 let missedOptionalItem = 0;
-                                message = "";
+                                let missingMessage = "게다가 ";
                                 if (!hasPajamas) {
-                                    message += "잠옷"
+                                    missingMessage += "잠옷"
                                     missedOptionalItem++;
                                     influencingItems.push({ name: '잠옷', effect: 'negative' });
                                 }
                                 
                                 if (!hasLotion) {
-                                    if (missedOptionalItem > 0) {
-                                        message += ", "
-                                    }
-                                    message += "로션"
+                                    if (missedOptionalItem > 0) { missingMessage += ", " }
+                                    missingMessage += "로션"
                                     missedOptionalItem++;
                                     influencingItems.push({ name: '로션', effect: 'negative' });
                                 }
                                 
                                 if (!hasSkin) {
-                                    if (missedOptionalItem > 0) {
-                                        message += ", "
-                                    }
-                                    message += "스킨"
+                                    if (missedOptionalItem > 0) { missingMessage += ", " }
+                                    missingMessage += "스킨"
                                     missedOptionalItem++;
                                     influencingItems.push({ name: '스킨', effect: 'negative' });
                                 }
                                 
                                 if (!hasDryer) {
-                                    if (missedOptionalItem > 0) {
-                                        message += ", "
-                                    }
-                                    message += "드라이어를 "
+                                    if (missedOptionalItem > 0) { missingMessage += ", " }
+                                    missingMessage += "드라이어를 "
                                     missedOptionalItem++;
                                     influencingItems.push({ name: '드라이어', effect: 'negative' });
                                 } else {
-                                    message += "을 "
+                                    missingMessage += "을 "
                                 }
                                 
-                                message += "가져올 걸.. 가성비 호텔이라 비치해둔게 별로네. 그래도 쉴 수 있어.";
-                                
+                                if(missedOptionalItem > 0) {
+                                    missingMessage += "가져올 걸.. 가성비 호텔이라 비치해둔게 별로네.";
+                                    message += missingMessage;
+                                } else {
+                                     message += "가져온 세면도구로 편안한 저녁을 보냈다."
+                                }
+
                                 for (let i = 0; i < missedOptionalItem; i++) {
                                     stressChange += 1;
                                 }
