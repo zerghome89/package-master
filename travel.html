@@ -349,7 +349,7 @@
 
                 let currentDay = 1;
                 let currentTimeIndex = 0;
-                let intervalDuration = 5000; // 5 seconds, changed to let
+                let intervalDuration = 4000; // 5 seconds, changed to let
 
                 if (data.travelInfo.country === '제주도') {
                     timeSlots = {
@@ -371,10 +371,10 @@
                 speedToggleBtn.addEventListener('click', () => {
                     isFastMode = !isFastMode;
                     if (isFastMode) {
-                        intervalDuration = 2500; // 2x speed
+                        intervalDuration = 2000; // 2x speed
                         speedToggleBtn.textContent = '1배속으로';
                     } else {
-                        intervalDuration = 5000; // 1x speed
+                        intervalDuration = 4000; // 1x speed
                         speedToggleBtn.textContent = '2배속으로';
                     }
                 });
